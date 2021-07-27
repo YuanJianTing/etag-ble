@@ -1,0 +1,3 @@
+include ':eBLESdk'
+include ':app'
+rootProject.name = "eBlue"
