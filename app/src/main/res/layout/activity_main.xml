@@ -30,6 +30,7 @@
             android:digits="1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM"
             android:inputType="number"
             android:maxEms="12"
+            android:hint="扫描或输入标签条码"
             android:maxLines="1"
             android:paddingStart="8dp"
             android:paddingLeft="8dp"

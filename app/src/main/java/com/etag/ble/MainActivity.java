@@ -61,9 +61,11 @@ public class MainActivity extends BaseActivity implements OnScanBleListener {
         bleList.setHasFixedSize(true);
         bleList.setAdapter(tagAdapter);
         tagAdapter.setOnItemClickListener((view, device, position) -> {
-            editTagId.setText(device.getAddress());
+            editTagId.setText(device.getName());
         });
         initBle();
+        //默认SDK定时扫描
+        btnScan.setEnabled(false);
     }
 
     @Override
@@ -162,28 +164,23 @@ public class MainActivity extends BaseActivity implements OnScanBleListener {
         }
     }
 
-    private void connect(String mac){
-
-        BleManager.getInstance().connect(mac, new ConnectStateListener() {
+    private void connect(String imei){
+        BleManager.getInstance().connect(imei, new ConnectStateListener() {
             @Override
             public void onConnectSuccess() {
-                btnSend.setText("连接成功");
-                Log.i("ETAG","蓝牙连接成功");
-            }
+//                btnSend.setText("连接成功");
+//                Log.i("ETAG","蓝牙连接成功");
 
-            @Override
-            public void onConnectFail() {
-                btnSend.setText("连接失败");
-                btnSend.setEnabled(true);
-                Log.e("ETAG","蓝牙连接失败");
-            }
-
-            @Override
-            public void onOpenNotifySuccess() {
-                Log.i("ETAG","打开通知成功");
                 btnSend.setText("正在发送数据...");
                 //必须为打开通知成功后在发送数据
                 writeBitmap();
+            }
+
+            @Override
+            public void onConnectFail(String errorMessage) {
+                btnSend.setText("连接失败");
+                btnSend.setEnabled(true);
+                Log.e("ETAG","蓝牙连接失败");
             }
 
             @Override
@@ -198,7 +195,7 @@ public class MainActivity extends BaseActivity implements OnScanBleListener {
     private void writeBitmap(){
         if(radioColor.isChecked()){
             //彩色图片
-            BitmapDrawable colorDrawable= (BitmapDrawable) getResources().getDrawable(R.mipmap.test_bitmap);
+            BitmapDrawable colorDrawable= (BitmapDrawable) getResources().getDrawable(R.mipmap.test420);
             BleManager.getInstance().writeDitherBitmap(colorDrawable.getBitmap(), new SendStateListener() {
                 @Override
                 public void onSendSuccessfully(BleDeviceFeedback deviceFeedback) {
@@ -220,7 +217,7 @@ public class MainActivity extends BaseActivity implements OnScanBleListener {
             });
         }else{
             //黑、白、红 图片
-            BitmapDrawable priceBitmap= (BitmapDrawable) getResources().getDrawable(R.mipmap.etr0290_r);
+            BitmapDrawable priceBitmap= (BitmapDrawable) getResources().getDrawable(R.mipmap.etr_420);
             BleManager.getInstance().writeBitmap(priceBitmap.getBitmap(), new SendStateListener() {
                 @Override
                 public void onSendSuccessfully(BleDeviceFeedback deviceFeedback) {
@@ -285,16 +282,17 @@ public class MainActivity extends BaseActivity implements OnScanBleListener {
                 if(TextUtils.isEmpty(result))
                     return;
                 //扫到的标签MAC没有 ’：‘号
-                String regex = "(.{2})";
-                String mac = result.replaceAll(regex,"$1:");
-                mac = mac.substring(0,mac.length() - 1);
-                editTagId.setText(mac);
+//                String regex = "(.{2})";
+//                String mac = result.replaceAll(regex,"$1:");
+//                mac = mac.substring(0,mac.length() - 1);
+                editTagId.setText(result);
             }
         }
     }
 
     @Override
     protected void onDestroy() {
+        BleManager.getInstance().stopContinuedScan();
         BleManager.getInstance().removeOnScanBleListener(this);
         BleManager.getInstance().stopScan();
         BleManager.getInstance().closeConnect();
