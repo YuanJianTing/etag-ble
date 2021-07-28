@@ -40,14 +40,14 @@ BleManager.getInstance().scanBle(mac);
 ```C#
 BleManager.getInstance().stopScan();
 ```
-- 连接设备 (mac 为扫描到的蓝牙bluetoothDevice.getAddress())
+- 连接设备 (imei 为扫描到的条码)
 ```C#
 BleManager.getInstance().connect(imei, new ConnectStateListener() {
             @Override
             public void onConnectSuccess() {
                 Log.i("ETAG","蓝牙连接成功");
-                 btnSend.setText("正在发送数据...");
-                //必须为打开通知成功后在发送数据
+                btnSend.setText("正在发送数据...");
+                //必须为成功后在发送数据
                 writeBitmap();
             }
 
