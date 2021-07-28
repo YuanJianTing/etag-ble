@@ -42,7 +42,7 @@ BleManager.getInstance().stopScan();
 ```
 - 连接设备 (mac 为扫描到的蓝牙bluetoothDevice.getAddress())
 ```C#
-BleManager.getInstance().connect(mac, new ConnectStateListener() {
+BleManager.getInstance().connect(imei, new ConnectStateListener() {
             @Override
             public void onConnectSuccess() {
                 Log.i("ETAG","蓝牙连接成功");
