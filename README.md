@@ -1,7 +1,7 @@
 # 易泰勒蓝牙标签 Android SDK
 支持Android SDK5.0 以上版本；手机需要支持低功耗蓝牙(BLE)蓝牙版本为5.0以上
 
-## Build 1.0.4
+## Build 1.0.5
 
 **使用流程**
 - 初始化SDK(Android6.0需提前获取蓝牙及位置权限)
@@ -141,6 +141,7 @@ Constants.TagType tagType= BleManager.getInstance().getTagType(mac);
 ## 更新日志
 - 1.0.0 修改标签类型
 - 1.0.4 1、移除链接蓝牙时的onOpenNotifySuccess 回调；2、添加自动周期扫描附近蓝牙设备（调用BleManager.getInstance().stopContinuedScan() 停止）；
+- 1.0.5 调整SDK数据包处理速度；
 
 ## 异常处理与解释
 - 无法扫描到附近的设备
