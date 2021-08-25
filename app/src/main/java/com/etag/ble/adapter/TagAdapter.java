@@ -5,6 +5,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.TextView;
 
 import androidx.annotation.IdRes;
@@ -18,8 +19,8 @@ import java.util.List;
 
 public class TagAdapter extends  RecyclerView.Adapter<TagAdapter.TagViewHolder> {
 
-    private List<BluetoothDevice> items;
-    private OnItemClickListener<BluetoothDevice> onItemClickListener;
+    private List<BleEntity> items;
+    private OnItemClickListener<BleEntity> onItemClickListener;
     public TagAdapter(){
         items=new ArrayList<>();
     }
@@ -33,9 +34,16 @@ public class TagAdapter extends  RecyclerView.Adapter<TagAdapter.TagViewHolder> 
 
     @Override
     public void onBindViewHolder(@NonNull TagViewHolder holder, int position) {
-        BluetoothDevice device= items.get(position);
+        BleEntity device= items.get(position);
         holder.setText(R.id.txt_name, TextUtils.concat("name:",device.getName()));
         holder.setText(R.id.txt_mac,TextUtils.concat("MAC:",device.getAddress()));
+
+        CheckBox checkBox= holder.findViewById(R.id.checkbox);
+        checkBox.setChecked(device.isCheck());
+        checkBox.setOnCheckedChangeListener((compoundButton, b) -> {
+            device.setCheck(b);
+            notifyDataSetChanged();
+        });
         if(onItemClickListener!=null)
             holder.itemView.setOnClickListener(v->onItemClickListener.onItemClick(holder.itemView,device,position));
     }
@@ -46,7 +54,10 @@ public class TagAdapter extends  RecyclerView.Adapter<TagAdapter.TagViewHolder> 
     }
 
     public void addItem(BluetoothDevice device){
-        this.items.add(device);
+        BleEntity bleEntity=new BleEntity();
+        bleEntity.setAddress(device.getAddress());
+        bleEntity.setName(device.getName());
+        this.items.add(bleEntity);
         notifyDataSetChanged();
     }
 
@@ -55,7 +66,16 @@ public class TagAdapter extends  RecyclerView.Adapter<TagAdapter.TagViewHolder> 
         notifyDataSetChanged();
     }
 
-    public void setOnItemClickListener(OnItemClickListener<BluetoothDevice> onItemClickListener) {
+    public List<String> getCheckList(){
+        List<String> list=new ArrayList<>();
+        for (BleEntity ble:this.items) {
+            if (ble.isCheck())
+                list.add(ble.getName());
+        }
+        return list;
+    }
+
+    public void setOnItemClickListener(OnItemClickListener<BleEntity> onItemClickListener) {
         this.onItemClickListener = onItemClickListener;
     }
 
@@ -73,4 +93,36 @@ public class TagAdapter extends  RecyclerView.Adapter<TagAdapter.TagViewHolder> 
         }
 
     }
+
+
+    public class BleEntity{
+        private String name;
+        private String address;
+        private boolean check;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getAddress() {
+            return address;
+        }
+
+        public void setAddress(String address) {
+            this.address = address;
+        }
+
+        public boolean isCheck() {
+            return check;
+        }
+
+        public void setCheck(boolean check) {
+            this.check = check;
+        }
+    }
 }
+

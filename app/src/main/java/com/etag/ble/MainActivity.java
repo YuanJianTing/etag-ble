@@ -17,10 +17,12 @@ import android.widget.RadioButton;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.etag.ble.adapter.TagAdapter;
+import com.etag.blesdk.AwakenTask;
 import com.etag.blesdk.BleManager;
 import com.etag.blesdk.listeners.ConnectStateListener;
 import com.etag.blesdk.listeners.OnScanBleListener;
@@ -29,6 +31,9 @@ import com.etag.blesdk.protocol.BleDeviceFeedback;
 import com.etag.blesdk.utils.LocationUtils;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
+
+import java.util.Arrays;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -46,6 +51,8 @@ public class MainActivity extends BaseActivity implements OnScanBleListener {
     Button btnSend;
     @BindView(R.id.radio_color)
     RadioButton radioColor;
+    @BindView(R.id.btn_remote_control)
+    Button btnRemoteControl;
 
     private TagAdapter tagAdapter;
 
@@ -59,6 +66,7 @@ public class MainActivity extends BaseActivity implements OnScanBleListener {
         tagAdapter=new TagAdapter();
         bleList.setLayoutManager(new LinearLayoutManager(this));
         bleList.setHasFixedSize(true);
+        bleList.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.VERTICAL));
         bleList.setAdapter(tagAdapter);
         tagAdapter.setOnItemClickListener((view, device, position) -> {
             editTagId.setText(device.getName());
@@ -75,6 +83,7 @@ public class MainActivity extends BaseActivity implements OnScanBleListener {
 
     public void initBle() {
         BleManager.getInstance().init(this);
+        BleManager.getInstance().setDebug(true);
         BleManager.getInstance().addOnScanBleListener(this);
         if (!BleManager.getInstance().isSupportBle()) {
             new AlertDialog.Builder(this)
@@ -129,7 +138,7 @@ public class MainActivity extends BaseActivity implements OnScanBleListener {
         }
     }
 
-    @OnClick({R.id.btn_scanning,R.id.btn_send,R.id.btn_scan})
+    @OnClick({R.id.btn_scanning,R.id.btn_send,R.id.btn_scan,R.id.btn_remote_control})
     public void viewClick(View view){
         switch (view.getId()){
             case R.id.btn_scanning:
@@ -160,6 +169,16 @@ public class MainActivity extends BaseActivity implements OnScanBleListener {
                 //扫描 10秒
                 HandlerHelper.postDelayed(timeoutSearch,10000);
                 break;
+            case R.id.btn_remote_control:
+//                if(TextUtils.isEmpty(editTagId.getText()))
+//                    return;
+                List<String> imeiList =tagAdapter.getCheckList();
+                if (imeiList.size()==0)
+                    return;
+                btnRemoteControl.setEnabled(false);
+                btnRemoteControl.setText("正在发送...");
+                remoteControl(imeiList);
+                break;
 
         }
     }
@@ -168,12 +187,11 @@ public class MainActivity extends BaseActivity implements OnScanBleListener {
         BleManager.getInstance().connect(imei, new ConnectStateListener() {
             @Override
             public void onConnectSuccess() {
-//                btnSend.setText("连接成功");
-//                Log.i("ETAG","蓝牙连接成功");
-
+                Log.i("ETAG","蓝牙连接成功");
                 btnSend.setText("正在发送数据...");
-                //必须为打开通知成功后在发送数据
+                //必须为成功后在发送数据
                 writeBitmap();
+
             }
 
             @Override
@@ -238,6 +256,28 @@ public class MainActivity extends BaseActivity implements OnScanBleListener {
                 }
             });
         }
+    }
+
+
+    private void remoteControl( List<String> imeiList){
+
+        new AwakenTask()
+                .setOnSendStateListener(new AwakenTask.OnSendStateListener() {
+                    @Override
+                    public void onSendFail(String imei) {
+                        Log.e("ETAG",String.format("标签%s发送失败！",imei));
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        Log.e("ETAG","所有队列发送完成");
+                        btnRemoteControl.setEnabled(true);
+                        btnRemoteControl.setText("远程唤醒");
+                    }
+                })
+                //.push(imei)
+                .pushList(imeiList) //发送列表
+                .start();
     }
 
     private Runnable timeoutSearch=()->{
