@@ -1,7 +1,7 @@
 # 易泰勒蓝牙标签 Android SDK
 支持Android SDK5.0 以上版本；手机需要支持低功耗蓝牙(BLE)蓝牙版本为5.0以上
 
-## Build 1.0.0
+## Build 1.0.5
 
 **使用流程**
 - 初始化SDK(Android6.0需提前获取蓝牙及位置权限)
@@ -40,24 +40,20 @@ BleManager.getInstance().scanBle(mac);
 ```C#
 BleManager.getInstance().stopScan();
 ```
-- 连接设备 (mac 为扫描到的蓝牙bluetoothDevice.getAddress())
+- 连接设备 (imei 为扫描到的条码)
 ```C#
-BleManager.getInstance().connect(mac, new ConnectStateListener() {
+BleManager.getInstance().connect(imei, new ConnectStateListener() {
             @Override
             public void onConnectSuccess() {
                 Log.i("ETAG","蓝牙连接成功");
+                btnSend.setText("正在发送数据...");
+                //必须为成功后在发送数据
+                writeBitmap();
             }
 
             @Override
             public void onConnectFail() {
                 Log.e("ETAG","蓝牙连接失败");
-            }
-
-            @Override
-            public void onOpenNotifySuccess() {
-                Log.i("ETAG","打开通知成功");
-                //必须为打开通知成功后在发送数据
-                //writeBitmap();
             }
 
             @Override
@@ -125,6 +121,7 @@ BleManager.getInstance().connect(mac, new ConnectStateListener() {
 BleManager.getInstance().removeOnScanBleListener(this);
 BleManager.getInstance().stopScan();
 BleManager.getInstance().closeConnect();
+BleManager.getInstance().stopContinuedScan();
 ```
 
 ## 标签类型
@@ -143,6 +140,8 @@ Constants.TagType tagType= BleManager.getInstance().getTagType(mac);
 
 ## 更新日志
 - 1.0.0 修改标签类型
+- 1.0.4 1、移除链接蓝牙时的onOpenNotifySuccess 回调；2、添加自动周期扫描附近蓝牙设备（调用BleManager.getInstance().stopContinuedScan() 停止）；
+- 1.0.5 调整SDK数据包处理速度；
 
 ## 异常处理与解释
 - 无法扫描到附近的设备
