@@ -162,7 +162,7 @@ Constants.TagType tagType= BleManager.getInstance().getTagType(mac);
 - 1.0.4 1、移除链接蓝牙时的onOpenNotifySuccess 回调；2、添加自动周期扫描附近蓝牙设备（调用BleManager.getInstance().stopContinuedScan() 停止）；
 - 1.0.5 调整SDK数据包处理速度；
 - 1.0.6 添加远程唤醒功能；
-- 1.0.7 1、蓝牙sdk唤醒过程支持停止；2、唤醒过程反馈成功的imei；
+- 1.0.7 蓝牙sdk唤醒过程支持停止；唤醒过程反馈成功的imei；
 
 ## 异常处理与解释
 - 无法扫描到附近的设备
