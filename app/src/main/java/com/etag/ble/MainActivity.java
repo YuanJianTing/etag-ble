@@ -261,11 +261,17 @@ public class MainActivity extends BaseActivity implements OnScanBleListener {
 
     private void remoteControl( List<String> imeiList){
 
-        new AwakenTask()
+        AwakenTask awakenTask=new AwakenTask();
+        awakenTask
                 .setOnSendStateListener(new AwakenTask.OnSendStateListener() {
                     @Override
                     public void onSendFail(String imei) {
                         Log.e("ETAG",String.format("标签%s发送失败！",imei));
+                    }
+
+                    @Override
+                    public void onSendSuccessfully(String imei) {
+                        Log.e("ETAG",String.format("标签%s发送成功！",imei));
                     }
 
                     @Override
@@ -278,6 +284,8 @@ public class MainActivity extends BaseActivity implements OnScanBleListener {
                 //.push(imei)
                 .pushList(imeiList) //发送列表
                 .start();
+        //停止唤醒
+        //awakenTask.stop();
     }
 
     private Runnable timeoutSearch=()->{
