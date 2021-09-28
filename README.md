@@ -1,7 +1,7 @@
 # 易泰勒蓝牙标签 Android SDK
 支持Android SDK5.0 以上版本；手机需要支持低功耗蓝牙(BLE)蓝牙版本为5.0以上
 
-## Build 1.0.6
+## Build 1.0.7
 
 **使用流程**
 - 初始化SDK(Android6.0需提前获取蓝牙及位置权限)
