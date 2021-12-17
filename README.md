@@ -147,7 +147,7 @@ new AwakenTask()
 ConfigTask configTask=new ConfigTask();
         configTask
                 .setPort(1237)
-                .setServerIP("116.62.125.184")
+                .setServerIP("11.0.0.1")
                 .setOnSendStateListener(new AwakenTask.OnSendStateListener() {
                     @Override
                     public void onSendFail(String imei) {
