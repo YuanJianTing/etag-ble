@@ -142,7 +142,36 @@ new AwakenTask()
          .pushList(imeiList) //发送列表
          .start();
 ```
+- 修改标签配置
+```java
+ConfigTask configTask=new ConfigTask();
+        configTask
+                .setPort(1237)
+                .setServerIP("116.62.125.184")
+                .setOnSendStateListener(new AwakenTask.OnSendStateListener() {
+                    @Override
+                    public void onSendFail(String imei) {
+                        Log.e("ETAG",String.format("标签%s发送失败！",imei));
+                    }
 
+                    @Override
+                    public void onSendSuccessfully(String imei) {
+                        Log.e("ETAG",String.format("标签%s发送成功！",imei));
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        Log.e("ETAG","所有队列发送完成");
+                        btnConfig.setEnabled(true);
+                        btnConfig.setText("重新配置");
+                    }
+                })
+                //.push(imei)
+                .pushList(imeiList) //发送列表
+                .start();
+    //停止
+    configTask.stop();
+```
 ## 标签类型
 
 | product               | width    | height         |
