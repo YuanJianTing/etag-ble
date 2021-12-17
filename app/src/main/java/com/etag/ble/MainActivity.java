@@ -24,11 +24,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.etag.ble.adapter.TagAdapter;
 import com.etag.blesdk.AwakenTask;
 import com.etag.blesdk.BleManager;
+import com.etag.blesdk.ConfigTask;
 import com.etag.blesdk.listeners.ConnectStateListener;
 import com.etag.blesdk.listeners.OnScanBleListener;
 import com.etag.blesdk.listeners.SendStateListener;
 import com.etag.blesdk.protocol.BleDeviceFeedback;
 import com.etag.blesdk.utils.LocationUtils;
+import com.etag.blesdk.utils.StringUtils;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 
@@ -53,6 +55,8 @@ public class MainActivity extends BaseActivity implements OnScanBleListener {
     RadioButton radioColor;
     @BindView(R.id.btn_remote_control)
     Button btnRemoteControl;
+    @BindView(R.id.btn_config)
+    Button btnConfig;
 
     private TagAdapter tagAdapter;
 
@@ -138,7 +142,7 @@ public class MainActivity extends BaseActivity implements OnScanBleListener {
         }
     }
 
-    @OnClick({R.id.btn_scanning,R.id.btn_send,R.id.btn_scan,R.id.btn_remote_control})
+    @OnClick({R.id.btn_scanning,R.id.btn_send,R.id.btn_scan,R.id.btn_remote_control,R.id.btn_config})
     public void viewClick(View view){
         switch (view.getId()){
             case R.id.btn_scanning:
@@ -179,9 +183,49 @@ public class MainActivity extends BaseActivity implements OnScanBleListener {
                 btnRemoteControl.setText("正在发送...");
                 remoteControl(imeiList);
                 break;
+            case R.id.btn_config:
+                imeiList =tagAdapter.getCheckList();
+                if (imeiList.size()==0)
+                    return;
+                btnConfig.setEnabled(false);
+                btnConfig.setText("正在发送...");
+                config(imeiList);
+                break;
 
         }
     }
+
+    private void config( List<String> imeiList){
+        ConfigTask configTask=new ConfigTask();
+        configTask
+                .setPort(61651)
+                .setServerIP("58.254.146.156")
+                .setOnSendStateListener(new AwakenTask.OnSendStateListener() {
+                    @Override
+                    public void onSendFail(String imei) {
+                        Log.e("ETAG",String.format("标签%s发送失败！",imei));
+                    }
+
+                    @Override
+                    public void onSendSuccessfully(String imei) {
+                        Log.e("ETAG",String.format("标签%s发送成功！",imei));
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        Log.e("ETAG","所有队列发送完成");
+                        btnConfig.setEnabled(true);
+                        btnConfig.setText("重新配置");
+                    }
+                })
+                //.push(imei)
+                .pushList(imeiList) //发送列表
+                .start();
+        //停止
+        //configTask.stop();
+    }
+
+
 
     private void connect(String imei){
         BleManager.getInstance().connect(imei, new ConnectStateListener() {
@@ -198,7 +242,7 @@ public class MainActivity extends BaseActivity implements OnScanBleListener {
             public void onConnectFail(String errorMessage) {
                 btnSend.setText("连接失败");
                 btnSend.setEnabled(true);
-                Log.e("ETAG","蓝牙连接失败");
+                Log.e("ETAG","蓝牙连接失败:"+errorMessage);
             }
 
             @Override
@@ -313,7 +357,10 @@ public class MainActivity extends BaseActivity implements OnScanBleListener {
      */
     @Override
     public void onAddBluetoothDevice(BluetoothDevice device, int rssi) {
-        tagAdapter.addItem(device);
+//        String name=device.getName();
+//        if(name.endsWith("1916")) {
+            tagAdapter.addItem(device);
+        //}
     }
 
     @Override
